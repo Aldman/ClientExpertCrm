@@ -4,18 +4,13 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
+      <Folder Include="Cache\" />
       <Folder Include="Controllers\" />
       <Folder Include="DTOs\" />
+      <Folder Include="Events\" />
       <Folder Include="Messaging\" />
       <Folder Include="Models\" />
       <Folder Include="Services\" />
