@@ -12,7 +12,6 @@
       <Folder Include="DTOs\" />
       <Folder Include="Events\" />
       <Folder Include="Messaging\" />
-      <Folder Include="Models\" />
       <Folder Include="Services\" />
     </ItemGroup>
 
