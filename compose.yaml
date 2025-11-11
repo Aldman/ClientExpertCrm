@@ -1,7 +1,35 @@
 ﻿services:
-  userservice:
-    image: userservice
+  CRMService:
+    image: alldman/crmservice:latest
+    container_name: CRMService
     build:
-      context: .
-      dockerfile: UserService/Dockerfile
-
+      context: ./src/CRMService
+    restart: always
+    ports:
+      - "8080:8080"
+  
+  NotificationService:
+    image: alldman/notificationservice:latest
+    container_name: NotificationService
+    build:
+      context: ./src/NotificationService
+    restart: always
+    ports:
+      - "8081:8080"
+  
+  UserService:
+    image: alldman/userservice:latest
+    container_name: UserService
+    build:
+      context: ./src/UserService
+    restart: always
+    ports:
+      - "8082:8080"
+  
+  RabbitMq:
+    image: rabbitmq:4.2.0-management-alpine
+    container_name: RabbitMq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
