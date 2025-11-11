@@ -9,3 +9,10 @@ public class Session
     public required Status Status { get; set; }
     public required string Notes { get; set; }
 }
+
+public enum Status
+{
+    Planned,
+    Completed,
+    Canceled,
+}
