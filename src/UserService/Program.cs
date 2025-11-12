@@ -1,6 +1,29 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using Serilog;
+using UserService.Extensions;
 
-app.MapGet("/", () => "Hello World! From UserService");
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-app.Run();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Services.ConfigureAllServices();
+    
+    var app = builder
+        .Build()
+        .SetupMiddlewares();
+
+    app.MapGet("/", () => "Hello World! From UserService");
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Неожиданное завершение работы приложения. Текст ошибки: {ErrorMessage}", ex.Message);
+}
+finally
+{
+    Log.Information(Environment.NewLine);
+    Log.CloseAndFlush();
+}
