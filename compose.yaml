@@ -33,3 +33,19 @@
     ports:
       - "5672:5672"
       - "15672:15672"
+        
+  UserServiceDb:
+    image: postgres:18
+    container_name: UserServiceDb
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user123
+      - POSTGRES_DB=user-service-db
+    restart: always
+    ports:
+      - "5436:5432"
+    volumes:
+      - UserServiceData:/var/lib/postgresql/MAJOR/docker
+        
+volumes:
+  UserServiceData:

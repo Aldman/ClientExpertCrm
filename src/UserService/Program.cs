@@ -8,13 +8,11 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    builder.Services.ConfigureAllServices();
+    builder.Services.ConfigureAllServices(builder.Configuration);
     
     var app = builder
         .Build()
         .SetupMiddlewares();
-
-    app.MapGet("/", () => "Hello World! From UserService");
 
     app.Run();
 }
