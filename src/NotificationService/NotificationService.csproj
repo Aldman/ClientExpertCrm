@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <Folder Include="Consumers\" />
-      <Folder Include="Messaging\" />
       <Folder Include="Services\" />
     </ItemGroup>
 
@@ -31,6 +30,10 @@
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Shared\Shared.csproj" />
     </ItemGroup>
 
 </Project>

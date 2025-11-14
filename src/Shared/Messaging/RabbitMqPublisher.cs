@@ -26,13 +26,17 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
             _connection = factory
                 .CreateConnectionAsync()
                 .WaitAndGetResult();
+            
             _channel = _connection
                 .CreateChannelAsync()
                 .WaitAndGetResult();
-            
             _channel.ExchangeDeclareAsync(
                 exchange: Exchange.DefaultExchange,
                 type: ExchangeType.Direct);
+            _channel.QueueDeclareAsync(
+                queue: WellKnownNames.DefaultQueue,
+                durable: true
+            );
 
             _connection.ConnectionShutdownAsync += (_, _) =>
             {

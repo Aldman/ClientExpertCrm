@@ -14,8 +14,6 @@ try
         .Build()
         .SetupMiddlewares();
 
-    app.MapGet("/", () => "Hello World! From NotificationService");
-
     app.Run();
 }
 catch (Exception ex)
