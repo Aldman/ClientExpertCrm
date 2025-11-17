@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using Shared.Constants;
@@ -10,16 +11,23 @@ namespace Shared.Messaging;
 public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
 {
     private readonly ILogger<RabbitMqPublisher> _logger;
+    private readonly IConfiguration _configuration;
     private readonly IConnection _connection;
     private readonly IChannel _channel;
 
-    public RabbitMqPublisher(ILogger<RabbitMqPublisher> logger)
+    public RabbitMqPublisher(ILogger<RabbitMqPublisher> logger,
+        IConfiguration configuration)
     {
         _logger = logger;
+        _configuration = configuration;
 
         var factory = new ConnectionFactory
         {
-            HostName = "localhost"
+            HostName = _configuration["RabbitMq:HostName"]!,
+            Port = 5672,
+            UserName = _configuration["RabbitMq:User"]!,
+            Password = _configuration["RabbitMq:Password"]!,
+            RequestedHeartbeat = TimeSpan.FromSeconds(60)
         };
         try
         {
@@ -32,11 +40,12 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
                 .WaitAndGetResult();
             _channel.ExchangeDeclareAsync(
                 exchange: Exchange.DefaultExchange,
-                type: ExchangeType.Direct);
+                type: ExchangeType.Direct)
+                .WaitProperly();
             _channel.QueueDeclareAsync(
                 queue: WellKnownNames.DefaultQueue,
-                durable: true
-            );
+                durable: true)
+            .WaitProperly();
 
             _connection.ConnectionShutdownAsync += (_, _) =>
             {
@@ -52,14 +61,17 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
         }
     }
     
-    public async Task PublishAsync<T>(T dto, string routingKey)
+    public async Task PublishAsync<T>(T dto, 
+        string routingKey, 
+        CancellationToken cancellationToken = default) 
+        where T : class
     {
         var message = JsonSerializer.Serialize(dto);
 
         if (_channel.IsOpen)
         {
             _logger.LogInformation("RabbitMq connection opened, sending message...");
-            await SendMessage(message, routingKey);
+            await SendMessageAsync(message, routingKey);
         }
         else
         {
@@ -67,7 +79,7 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
         }
     }
     
-    public async Task SendMessage(string message, string routingKey)
+    public async Task SendMessageAsync(string message, string routingKey)
     {
         var body = Encoding.UTF8.GetBytes(message);
         

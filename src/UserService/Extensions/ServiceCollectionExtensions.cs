@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
+using Shared.Messaging;
 using UserService.Data;
 using UserService.Data.Repository;
 using UserService.Services;
@@ -21,6 +22,7 @@ public static class ServiceCollectionExtensions
         });
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, Services.UserService>();
+        services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
         services.AddControllers();
         services.AddSwaggerGen();
 

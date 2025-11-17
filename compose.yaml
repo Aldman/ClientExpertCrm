@@ -1,40 +1,53 @@
 ﻿services:
-  CRMService:
-    image: alldman/crmservice:latest
+  crm-service:
+#    image: alldman/crmservice:latest
     container_name: CRMService
+    depends_on:
+      - rabbit-mq
     build:
-      context: ./src/CRMService
+      context: .
+      dockerfile: ./src/CRMService/Dockerfile
     restart: always
     ports:
       - "8080:8080"
-  
-  NotificationService:
-    image: alldman/notificationservice:latest
+
+  notification-service:
+#    image: alldman/notificationservice:latest
     container_name: NotificationService
+    depends_on:
+      - rabbit-mq
     build:
-      context: ./src/NotificationService
+      context: .
+      dockerfile: ./src/NotificationService/Dockerfile
     restart: always
     ports:
       - "8081:8080"
   
-  UserService:
-    image: alldman/userservice:latest
+  user-service:
+#    image: alldman/userservice:latest
     container_name: UserService
+    depends_on:
+      - user-service-db
+      - rabbit-mq
     build:
-      context: ./src/UserService
+      context: .
+      dockerfile: ./src/UserService/Dockerfile
     restart: always
     ports:
       - "8082:8080"
   
-  RabbitMq:
+  rabbit-mq:
     image: rabbitmq:4.2.0-management-alpine
     container_name: RabbitMq
     restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=crm
+      - RABBITMQ_DEFAULT_PASS=crm123
     ports:
       - "5672:5672"
       - "15672:15672"
         
-  UserServiceDb:
+  user-service-db:
     image: postgres:18
     container_name: UserServiceDb
     environment:

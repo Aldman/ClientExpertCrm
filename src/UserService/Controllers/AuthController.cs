@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shared.Constants;
+using Shared.Messaging;
 using UserService.DTOs;
 using UserService.Services;
 
@@ -9,10 +11,12 @@ namespace UserService.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IEventPublisher _eventPublisher;
 
-    public AuthController(IUserService userService)
+    public AuthController(IUserService userService, IEventPublisher eventPublisher)
     {
         _userService = userService;
+        _eventPublisher = eventPublisher;
     }
 
     [HttpPost("register")]
@@ -21,6 +25,7 @@ public class AuthController : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _userService.RegisterAsync(user, cancellationToken);
+        await _eventPublisher.PublishAsync(result, RoutingKeys.ClientCreated, cancellationToken);
 
         return CreatedAtAction(
             actionName: nameof(GetUserById),

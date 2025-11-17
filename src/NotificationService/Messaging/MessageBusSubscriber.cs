@@ -10,6 +10,7 @@ namespace NotificationService.Messaging;
 public class MessageBusSubscriber : BackgroundService
 {
     private readonly IEventProcessor _eventProcessor;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<MessageBusSubscriber> _logger;
     private IConnection _connection;
     private IChannel _channel;
@@ -17,9 +18,11 @@ public class MessageBusSubscriber : BackgroundService
 
     public MessageBusSubscriber(
         IEventProcessor eventProcessor,
+        IConfiguration configuration,
         ILogger<MessageBusSubscriber> logger)
     {
         _eventProcessor = eventProcessor;
+        _configuration = configuration;
         _logger = logger;
         InitializeRabbitMq();
     }
@@ -28,8 +31,11 @@ public class MessageBusSubscriber : BackgroundService
     {
         var factory = new ConnectionFactory
         {
-            HostName = "localhost",
-            Port = 5672
+            HostName = _configuration["RabbitMq:HostName"]!,
+            Port = 5672,
+            UserName = _configuration["RabbitMq:User"]!,
+            Password = _configuration["RabbitMq:Password"]!,
+            RequestedHeartbeat = TimeSpan.FromSeconds(60)
         };
         
         _connection = factory
