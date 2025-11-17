@@ -40,10 +40,12 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
                 .WaitAndGetResult();
             _channel.ExchangeDeclareAsync(
                 exchange: Exchange.DefaultExchange,
+                durable: true,
                 type: ExchangeType.Direct)
                 .WaitProperly();
             _channel.QueueDeclareAsync(
                 queue: WellKnownNames.DefaultQueue,
+                exclusive: false,
                 durable: true)
             .WaitProperly();
 

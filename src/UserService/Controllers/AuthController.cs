@@ -11,11 +11,15 @@ namespace UserService.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly ILogger<AuthController> _logger;
     private readonly IEventPublisher _eventPublisher;
 
-    public AuthController(IUserService userService, IEventPublisher eventPublisher)
+    public AuthController(IUserService userService, 
+        ILogger<AuthController> logger,
+        IEventPublisher eventPublisher)
     {
         _userService = userService;
+        _logger = logger;
         _eventPublisher = eventPublisher;
     }
 
@@ -25,7 +29,15 @@ public class AuthController : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _userService.RegisterAsync(user, cancellationToken);
-        await _eventPublisher.PublishAsync(result, RoutingKeys.ClientCreated, cancellationToken);
+
+        try
+        {
+            await _eventPublisher.PublishAsync(result, RoutingKeys.ClientCreated, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Couldn't publish register message. Error: {error}", e.GetBaseException().Message);
+        }
 
         return CreatedAtAction(
             actionName: nameof(GetUserById),

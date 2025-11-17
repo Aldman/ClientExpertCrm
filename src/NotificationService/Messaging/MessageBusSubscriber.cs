@@ -53,7 +53,8 @@ public class MessageBusSubscriber : BackgroundService
         _queueName = _channel
             .QueueDeclareAsync(
                 queue: WellKnownNames.DefaultQueue,
-                durable: true
+                durable: true,
+                exclusive: false
                 )
             .WaitAndGetResult()
             .QueueName;
