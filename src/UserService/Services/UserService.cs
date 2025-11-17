@@ -15,7 +15,7 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
     
-    public async Task<UserAuthDto> RegisterAsync(InputUserDto registerRequest, CancellationToken cancellationToken)
+    public async Task<UserAuthDto> RegisterAsync(RegisterUserRequestDto registerRequest, CancellationToken cancellationToken)
     {
         var hashedPassword = PasswordHasher.Generate(registerRequest.Password);
         var user = new User

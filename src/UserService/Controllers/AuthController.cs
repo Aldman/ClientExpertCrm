@@ -2,6 +2,7 @@
 using Shared.Constants;
 using Shared.Messaging;
 using UserService.DTOs;
+using UserService.Extensions;
 using UserService.Services;
 
 namespace UserService.Controllers;
@@ -25,10 +26,10 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     public async Task<ActionResult<UserAuthDto>> Register(
-        [FromBody] InputUserDto user,
+        [FromBody] RegisterUserRequestDto userRequest,
         CancellationToken cancellationToken)
     {
-        var result = await _userService.RegisterAsync(user, cancellationToken);
+        var result = await _userService.RegisterAsync(userRequest, cancellationToken);
 
         try
         {
@@ -39,6 +40,8 @@ public class AuthController : ControllerBase
             _logger.LogError("Couldn't publish register message. Error: {error}", e.GetBaseException().Message);
         }
 
+        Response.AddUserHeader(result.Id);
+        
         return CreatedAtAction(
             actionName: nameof(GetUserById),
             routeValues: new { UserId = result.Id },
@@ -61,6 +64,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<UserAuthDto>> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
         var result = await _userService.GetUserById(userId, cancellationToken);
+        Response.AddUserHeader(result.Id);
 
         return Ok(result);
     }
@@ -73,7 +77,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<UserAuthDto>> Login([FromBody] InputUserDto user)
+    public async Task<ActionResult<UserAuthDto>> Login([FromBody] RegisterUserRequestDto userRequest)
     {
         return Ok();
     }
