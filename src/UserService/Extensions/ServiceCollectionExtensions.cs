@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Shared.Constants;
 using Shared.Messaging;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using UserService.Data;
 using UserService.Data.Repository;
+using UserService.DTOs;
 using UserService.Helpers.Jwt;
 using UserService.Services;
+using UserService.Validators;
 
 namespace UserService.Extensions;
 
@@ -22,10 +26,19 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
         services.AddControllers();
         services.AddSwaggerGen();
+        ConfigureValidators(services);
         ConfigureSerilog(services, configuration);
         ConfigureAuth(services, configuration);
 
         return services;
+    }
+
+    private static void ConfigureValidators(IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddScoped<IValidator<RegisterUserRequestDto>, RegisterUserRequestDtoValidator>();
+        services.AddScoped<IValidator<GetUsersRequest>, GetUsersRequestValidator>();
+        services.AddScoped<IValidator<LoginUserRequestDto>, LoginUserRequestDtoValidator>();
     }
 
     private static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
