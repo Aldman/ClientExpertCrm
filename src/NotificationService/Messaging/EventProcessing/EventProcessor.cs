@@ -13,12 +13,20 @@ public class EventProcessor : IEventProcessor
     
     public void Process(string routingKey, string message)
     {
-        if (routingKey == RoutingKeys.ClientCreated)
-            _logger.LogInformation("Client created: {Message}", message);
-        else
+        switch (routingKey)
         {
-            // todo: временный стаб
-            _logger.LogInformation("Message: {Message}", message);
+            case RoutingKeys.UserCreated:
+                _logger.LogInformation("User created: {Message}", message);
+                break;
+            case RoutingKeys.UserLoggedIn:
+                _logger.LogInformation("User logged in: {Message}", message);
+                break;
+            case RoutingKeys.ClientCreated:
+                _logger.LogInformation("Client created: {Message}", message);
+                break;
+            case RoutingKeys.SessionPlanned:
+                _logger.LogInformation("Session planned: {Message}", message);
+                break;
         }
     }
 }

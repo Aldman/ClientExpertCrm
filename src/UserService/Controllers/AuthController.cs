@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
         _logger.LogInformation("Attempt to publish a registration message");
         try
         {
-            await _eventPublisher.PublishAsync(result, RoutingKeys.ClientCreated, cancellationToken);
+            await _eventPublisher.PublishAsync(result, RoutingKeys.UserCreated, cancellationToken);
         }
         catch (Exception e)
         {
@@ -94,6 +94,19 @@ public class AuthController : ControllerBase
     {
         _logger.LogInformation("Attempt to log in");
         var token = await _userService.LoginAsync(userRequest, cancellationToken);
+        
+        _logger.LogInformation("Attempt to publish a log in message");
+        try
+        {
+            await _eventPublisher.PublishAsync(
+                message: userRequest.Email,
+                routingKey: RoutingKeys.UserLoggedIn,
+                cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Couldn't publish log in message. Error: {error}", e.GetBaseException().Message);
+        }
 
         _logger.LogInformation("Writing a token to cookies");
         Response.Cookies.Append(WellKnownNames.TokenName, token);

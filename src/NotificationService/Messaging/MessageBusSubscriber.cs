@@ -59,18 +59,8 @@ public class MessageBusSubscriber : BackgroundService
             .WaitAndGetResult()
             .QueueName;
         
-        _channel.QueueBindAsync(
-            queue: _queueName,
-            exchange: Exchange.DefaultExchange,
-            routingKey: RoutingKeys.ClientCreated
-        ).WaitProperly();
-        
-        _channel.QueueBindAsync(
-            queue: _queueName,
-            exchange: Exchange.DefaultExchange,
-            routingKey: RoutingKeys.SessionPlanned
-        ).WaitProperly();
-        
+        BindRoutingKeys();
+
         _logger.LogInformation("Listening on the MessageBus");
 
         _connection.ConnectionShutdownAsync += (_, _) =>
@@ -79,7 +69,34 @@ public class MessageBusSubscriber : BackgroundService
             return Task.CompletedTask;
         };
     }
-    
+
+    private void BindRoutingKeys()
+    {
+        _channel.QueueBindAsync(
+            queue: _queueName,
+            exchange: Exchange.DefaultExchange,
+            routingKey: RoutingKeys.ClientCreated
+        ).WaitProperly();
+
+        _channel.QueueBindAsync(
+            queue: _queueName,
+            exchange: Exchange.DefaultExchange,
+            routingKey: RoutingKeys.SessionPlanned
+        ).WaitProperly();
+        
+        _channel.QueueBindAsync(
+            queue: _queueName,
+            exchange: Exchange.DefaultExchange,
+            routingKey: RoutingKeys.UserCreated
+        ).WaitProperly();
+        
+        _channel.QueueBindAsync(
+            queue: _queueName,
+            exchange: Exchange.DefaultExchange,
+            routingKey: RoutingKeys.UserLoggedIn
+        ).WaitProperly();
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
