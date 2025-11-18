@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
 using Shared.Messaging;
 using UserService.DTOs;
@@ -15,7 +16,7 @@ public class AuthController : ControllerBase
     private readonly ILogger<AuthController> _logger;
     private readonly IEventPublisher _eventPublisher;
 
-    public AuthController(IUserService userService, 
+    public AuthController(IUserService userService,
         ILogger<AuthController> logger,
         IEventPublisher eventPublisher)
     {
@@ -41,7 +42,7 @@ public class AuthController : ControllerBase
         }
 
         Response.AddUserHeader(result.Id);
-        
+
         return CreatedAtAction(
             actionName: nameof(GetUserById),
             routeValues: new { UserId = result.Id },
@@ -49,6 +50,7 @@ public class AuthController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpGet("users")]
     public async Task<ActionResult<IEnumerable<UserAuthDto>>> GetUsers(
         [FromQuery] GetUsersRequest request,
@@ -59,6 +61,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
     [HttpGet("user/{userId:guid}")]
     [ActionName(nameof(GetUserById))]
     public async Task<ActionResult<UserAuthDto>> GetUserById(Guid userId, CancellationToken cancellationToken)
@@ -69,6 +72,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
     [HttpDelete("delete/{userId:guid}")]
     public async Task<IActionResult> Delete(Guid userId, CancellationToken cancellationToken)
     {
@@ -77,8 +81,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<UserAuthDto>> Login([FromBody] RegisterUserRequestDto userRequest)
+    public async Task<ActionResult<string>> Login(
+        [FromBody] LoginUserRequestDto userRequest,
+        CancellationToken cancellationToken)
     {
-        return Ok();
+        var token = await _userService.LoginAsync(userRequest, cancellationToken);
+
+        Response.Cookies.Append(WellKnownNames.TokenName, token);
+
+        return Ok(token);
     }
 }
