@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureAllServices(this IServiceCollection services, IConfiguration configuration)
     {
+        ConfigureSerilog(services, configuration);
         ConfigureDbContext(services, configuration);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, Services.UserService>();
@@ -27,7 +28,6 @@ public static class ServiceCollectionExtensions
         services.AddControllers();
         services.AddSwaggerGen();
         ConfigureValidators(services);
-        ConfigureSerilog(services, configuration);
         ConfigureAuth(services, configuration);
 
         return services;
@@ -43,6 +43,8 @@ public static class ServiceCollectionExtensions
 
     private static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
     {
+        Log.Information("Configuring Auth");
+        
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -79,6 +81,8 @@ public static class ServiceCollectionExtensions
 
     private static void ConfigureDbContext(IServiceCollection services, IConfiguration configuration)
     {
+        Log.Information("Configuring DbContext");
+        
         services.AddDbContext<UsersDbContext>(options =>
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

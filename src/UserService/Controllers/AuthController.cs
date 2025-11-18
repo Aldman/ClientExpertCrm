@@ -30,8 +30,10 @@ public class AuthController : ControllerBase
         [FromBody] RegisterUserRequestDto userRequest,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("User registration");
         var result = await _userService.RegisterAsync(userRequest, cancellationToken);
 
+        _logger.LogInformation("Attempt to publish a registration message");
         try
         {
             await _eventPublisher.PublishAsync(result, RoutingKeys.ClientCreated, cancellationToken);
@@ -41,6 +43,7 @@ public class AuthController : ControllerBase
             _logger.LogError("Couldn't publish register message. Error: {error}", e.GetBaseException().Message);
         }
 
+        _logger.LogInformation("Adding user id to headers");
         Response.AddUserHeader(result.Id);
 
         return CreatedAtAction(
@@ -66,7 +69,10 @@ public class AuthController : ControllerBase
     [ActionName(nameof(GetUserById))]
     public async Task<ActionResult<UserAuthDto>> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Getting user by id");
         var result = await _userService.GetUserById(userId, cancellationToken);
+        
+        _logger.LogInformation("Adding user id to headers");
         Response.AddUserHeader(result.Id);
 
         return Ok(result);
@@ -76,6 +82,7 @@ public class AuthController : ControllerBase
     [HttpDelete("delete/{userId:guid}")]
     public async Task<IActionResult> Delete(Guid userId, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Deleting a user by id");
         await _userService.DeleteAsync(userId, cancellationToken);
         return NoContent();
     }
@@ -85,8 +92,10 @@ public class AuthController : ControllerBase
         [FromBody] LoginUserRequestDto userRequest,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Attempt to log in");
         var token = await _userService.LoginAsync(userRequest, cancellationToken);
 
+        _logger.LogInformation("Writing a token to cookies");
         Response.Cookies.Append(WellKnownNames.TokenName, token);
 
         return Ok(token);
