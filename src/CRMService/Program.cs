@@ -8,10 +8,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    builder.Services.ConfigureAllServices();
-    builder.Services.AddSerilog((services, lc) => lc
-        .ReadFrom.Configuration(builder.Configuration)
-        .ReadFrom.Services(services));
+    builder.Services.ConfigureAllServices(builder.Configuration);
     
     var app = builder
         .Build()

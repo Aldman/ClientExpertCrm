@@ -60,5 +60,19 @@
     volumes:
       - UserServiceData:/var/lib/postgresql/MAJOR/docker
         
+  crm-service-db:
+    image: postgres:18
+    container_name: CrmServiceDb
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user123
+      - POSTGRES_DB=crm-service-db
+    restart: always
+    ports:
+      - "5437:5432"
+    volumes:
+      - CrmServiceData:/var/lib/postgresql/MAJOR/docker
+        
 volumes:
   UserServiceData:
+  CrmServiceData:
