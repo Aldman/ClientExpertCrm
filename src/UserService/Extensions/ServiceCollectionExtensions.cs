@@ -15,27 +15,21 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureAllServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<UsersDbContext>(options =>
-        {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-        
-            var connectionString = configuration.GetConnectionString(WellKnownNames.DefaultConnection);
-        
-            options.UseNpgsql(connectionString);
-        });
+        ConfigureDbContext(services, configuration);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, Services.UserService>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
         services.AddControllers();
-        services.AddSerilog((serviceProvider, loggerConfiguration) =>
-        {
-            loggerConfiguration
-                .ReadFrom.Configuration(configuration)
-                .ReadFrom.Services(serviceProvider);
-        });
         services.AddSwaggerGen();
+        ConfigureSerilog(services, configuration);
+        ConfigureAuth(services, configuration);
+
+        return services;
+    }
+
+    private static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
+    {
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -58,7 +52,28 @@ public static class ServiceCollectionExtensions
                 };
             });
         services.AddAuthentication();
+    }
 
-        return services;
+    private static void ConfigureSerilog(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSerilog((serviceProvider, loggerConfiguration) =>
+        {
+            loggerConfiguration
+                .ReadFrom.Configuration(configuration)
+                .ReadFrom.Services(serviceProvider);
+        });
+    }
+
+    private static void ConfigureDbContext(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<UsersDbContext>(options =>
+        {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+        
+            var connectionString = configuration.GetConnectionString(WellKnownNames.DefaultConnection);
+        
+            options.UseNpgsql(connectionString);
+        });
     }
 }
