@@ -9,6 +9,9 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureAllServices();
+    builder.Services.AddSerilog((services, lc) => lc
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services));
     
     var app = builder
         .Build()
