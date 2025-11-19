@@ -8,4 +8,6 @@ public class Session
     public required int DurationInMinutes { get; set; }
     public required Status Status { get; set; }
     public required string Notes { get; set; }
+    
+    public Client Client { get; set; }
 }

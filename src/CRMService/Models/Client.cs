@@ -8,4 +8,6 @@ public class Client
     public required string Phone { get; set; }
     public required Guid UserId { get; set; }
     public required DateTime CreatedAt { get; set; } = DateTime.Now;
+    
+    public List<Session> Sessions { get; set; } = [];
 }
