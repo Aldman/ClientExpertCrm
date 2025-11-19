@@ -1,11 +1,10 @@
-﻿namespace CRMService.Models;
+﻿namespace CRMService.DTOs.Client;
 
-public class Client
+public class UpdateClientRequestDto
 {
     public required Guid Id { get; set; }
     public required string Name { get; set; }
     public required string Email { get; set; }
     public required string Phone { get; set; }
     public required Guid UserId { get; set; }
-    public required DateTime CreatedAt { get; set; } = DateTime.Now;
 }

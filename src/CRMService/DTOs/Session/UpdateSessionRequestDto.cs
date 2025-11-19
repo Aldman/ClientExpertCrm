@@ -1,6 +1,8 @@
-﻿namespace CRMService.Models;
+﻿using CRMService.Models;
 
-public class Session
+namespace CRMService.DTOs.Session;
+
+public class UpdateSessionRequestDto
 {
     public required Guid Id { get; set; }
     public required Guid ClientId { get; set; }

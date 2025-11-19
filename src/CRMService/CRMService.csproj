@@ -10,7 +10,6 @@
     <ItemGroup>
       <Folder Include="Cache\" />
       <Folder Include="Controllers\" />
-      <Folder Include="DTOs\" />
       <Folder Include="Events\" />
       <Folder Include="Messaging\" />
       <Folder Include="Services\" />
