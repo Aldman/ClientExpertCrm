@@ -11,3 +11,16 @@ public class Session
     
     public Client Client { get; set; }
 }
+
+public static class SessionExtensions
+{
+    public static void Change(this Session currentSession, Session newSession)
+    {
+        currentSession.ClientId = newSession.ClientId;
+        currentSession.ScheduledAt = newSession.ScheduledAt;
+        currentSession.DurationInMinutes = newSession.DurationInMinutes;
+        currentSession.Status = newSession.Status;
+        currentSession.Notes = newSession.Notes;
+        currentSession.Client = newSession.Client;
+    }
+}

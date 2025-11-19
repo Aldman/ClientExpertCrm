@@ -11,3 +11,15 @@ public class Client
     
     public List<Session> Sessions { get; set; } = [];
 }
+
+public static class ClientExtensions
+{
+    public static void Change(this Client currentClient, Client newClient)
+    {
+        currentClient.Name = newClient.Name;
+        currentClient.Email = newClient.Email;
+        currentClient.Phone = newClient.Phone;
+        currentClient.UserId = newClient.UserId;
+        currentClient.Sessions = newClient.Sessions;
+    }
+}
