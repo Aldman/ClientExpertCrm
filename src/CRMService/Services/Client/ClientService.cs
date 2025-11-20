@@ -55,7 +55,7 @@ public class ClientService : IClientService
         return clients.Adapt<List<ClientResponseDto>>();
     }
 
-    public async Task<List<ClientResponseDto>> GetClientsByUserId(Guid userId, CancellationToken cancellationToken)
+    public async Task<List<ClientResponseDto>> GetClientsByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var clients = await _repository.GetClientsByUserIdAsync(userId, cancellationToken);
         

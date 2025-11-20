@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <Folder Include="Cache\" />
-      <Folder Include="Controllers\" />
     </ItemGroup>
 
     <ItemGroup>

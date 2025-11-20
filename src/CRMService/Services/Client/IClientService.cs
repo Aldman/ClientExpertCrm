@@ -8,6 +8,6 @@ public interface IClientService
     Task<ClientResponseDto> UpdateAsync(Guid clientId, UpdateClientRequestDto request, CancellationToken cancellationToken);
     Task<ClientResponseDto> GetAsync(Guid clientId, CancellationToken cancellationToken);
     Task<List<ClientResponseDto>> GetAllUsingPaginationAsync(int page, int pageSize, CancellationToken cancellationToken);
-    Task<List<ClientResponseDto>> GetClientsByUserId(Guid userId, CancellationToken cancellationToken);
+    Task<List<ClientResponseDto>> GetClientsByUserIdAsync(Guid userId, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
 }
