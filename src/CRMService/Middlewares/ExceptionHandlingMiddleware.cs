@@ -25,6 +25,7 @@ public class ExceptionHandlingMiddleware
             {
                 ArgumentException => (HttpStatusCode.BadRequest, "Invalid request"),
                 ClientNotFoundException => (HttpStatusCode.NotFound, "Client not found"),
+                SessionNotFoundException => (HttpStatusCode.NotFound, "Session not found"),
                 InvalidDataException => (HttpStatusCode.Unauthorized, "Invalid input data"),
                 _ => (HttpStatusCode.InternalServerError, "Server error")
             };

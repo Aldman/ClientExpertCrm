@@ -1,6 +1,8 @@
 ﻿using CRMService.Data;
 using CRMService.Data.Repositories.Client;
 using CRMService.Data.Repositories.Session;
+using CRMService.Services.Client;
+using CRMService.Services.Session;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Constants;
@@ -18,6 +20,8 @@ public static class ServiceCollectionExtensions
         
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
+        services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<ISessionService, SessionService>();
         
         services.AddControllers();
         services.AddSwaggerGen();

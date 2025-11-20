@@ -1,4 +1,6 @@
-﻿namespace CRMService.Models;
+﻿using CRMService.DTOs.Session;
+
+namespace CRMService.Models;
 
 public class Session
 {
@@ -22,5 +24,16 @@ public static class SessionExtensions
         currentSession.Status = newSession.Status;
         currentSession.Notes = newSession.Notes;
         currentSession.Client = newSession.Client;
+    }
+    
+    public static Session Update(this Session currentSession, UpdateSessionRequestDto updateDto)
+    {
+        currentSession.ClientId = updateDto.ClientId;
+        currentSession.ScheduledAt = updateDto.ScheduledAt;
+        currentSession.DurationInMinutes = updateDto.DurationInMinutes;
+        currentSession.Status = updateDto.Status;
+        currentSession.Notes = updateDto.Notes;
+        
+        return currentSession;
     }
 }
