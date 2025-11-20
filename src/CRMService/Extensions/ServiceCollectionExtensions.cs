@@ -15,10 +15,12 @@ public static class ServiceCollectionExtensions
     {
         ConfigureSerilog(services, configuration);
         ConfigureDbContext(services, configuration);
-        services.AddControllers();
-        services.AddSwaggerGen();
+        
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
+        
+        services.AddControllers();
+        services.AddSwaggerGen();
 
         return services;
     }

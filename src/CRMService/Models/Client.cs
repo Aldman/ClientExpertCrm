@@ -1,4 +1,6 @@
-﻿namespace CRMService.Models;
+﻿using CRMService.DTOs.Client;
+
+namespace CRMService.Models;
 
 public class Client
 {
@@ -21,5 +23,15 @@ public static class ClientExtensions
         currentClient.Phone = newClient.Phone;
         currentClient.UserId = newClient.UserId;
         currentClient.Sessions = newClient.Sessions;
+    }
+    
+    public static Client Update(this Client currentClient, UpdateClientRequestDto updateInfo)
+    {
+        currentClient.Name = updateInfo.Name;
+        currentClient.Email = updateInfo.Email;
+        currentClient.Phone = updateInfo.Phone;
+        currentClient.UserId = updateInfo.UserId;
+        
+        return currentClient;
     }
 }

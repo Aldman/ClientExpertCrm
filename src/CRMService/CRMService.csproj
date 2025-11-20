@@ -10,12 +10,11 @@
     <ItemGroup>
       <Folder Include="Cache\" />
       <Folder Include="Controllers\" />
-      <Folder Include="Events\" />
-      <Folder Include="Messaging\" />
-      <Folder Include="Services\" />
+      <Folder Include="Services\Session\" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Mapster" Version="7.4.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
         <PrivateAssets>all</PrivateAssets>
