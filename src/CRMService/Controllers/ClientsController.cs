@@ -24,12 +24,8 @@ public class ClientsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _clientService.CreateAsync(requestDto, cancellationToken);
-        
-        return CreatedAtAction(
-            actionName: "GetClient",
-            routeValues: new { ClientId = result.Id },
-            value: result
-        );
+
+        return Created($"api/clients/{result.Id}", result);
     }
 
     [HttpPost("{id:guid}")]
@@ -54,7 +50,6 @@ public class ClientsController : ControllerBase
     }
     
     [HttpGet("{id:guid}")]
-    [ActionName("GetClient")]
     public async Task<IActionResult> GetClientAsync(
         Guid id,
         CancellationToken cancellationToken)
