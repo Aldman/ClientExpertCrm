@@ -14,8 +14,6 @@ try
         .Build()
         .SetupMiddlewares();
 
-    app.MapGet("/", () => "Hello World! From CRMService");
-
     app.Run();
 }
 catch (Exception ex)
@@ -24,6 +22,5 @@ catch (Exception ex)
 }
 finally
 {
-    Log.Information(Environment.NewLine);
     Log.CloseAndFlush();
 }
