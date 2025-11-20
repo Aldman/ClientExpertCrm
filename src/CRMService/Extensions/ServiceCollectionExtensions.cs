@@ -11,6 +11,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Constants;
+using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 namespace CRMService.Extensions;
@@ -28,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<IClientService, ClientService>();
         services.AddScoped<ISessionService, SessionService>();
+        services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
 
         AddValidation(services);
 

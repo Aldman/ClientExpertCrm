@@ -2,6 +2,9 @@
 using CRMService.DTOs.Session;
 using CRMService.Services.Session;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Constants;
+using Shared.Events;
+using Shared.Messaging;
 
 namespace CRMService.Controllers;
 
@@ -10,11 +13,15 @@ namespace CRMService.Controllers;
 public class SessionsController : ControllerBase
 {
     private readonly ISessionService _sessionService;
+    private readonly IEventPublisher _eventPublisher;
     private readonly ILogger<SessionsController> _logger;
 
-    public SessionsController(ISessionService sessionService, ILogger<SessionsController> logger)
+    public SessionsController(ISessionService sessionService,
+        IEventPublisher eventPublisher,
+        ILogger<SessionsController> logger)
     {
         _sessionService = sessionService;
+        _eventPublisher = eventPublisher;
         _logger = logger;
     }
 
@@ -24,6 +31,24 @@ public class SessionsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _sessionService.CreateAsync(requestDto, cancellationToken);
+
+        _logger.LogInformation("Attempt to publish a session planned message");
+        try
+        {
+            var sessionPlannedEvent = new SessionPlannedEvent
+            {
+                SessionId = result.Id,
+                ClientId = result.ClientId,
+                ScheduledAt = result.ScheduledAt,
+                DurationInMinutes = result.DurationInMinutes,
+            };
+            await _eventPublisher.PublishAsync(sessionPlannedEvent, RoutingKeys.SessionPlanned, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Couldn't publish a session planned message. Error: {error}",
+                e.GetBaseException().Message);
+        }
 
         return Created($"api/sessions/{result.Id}", result);
     }
@@ -37,13 +62,12 @@ public class SessionsController : ControllerBase
         var result = await _sessionService.UpdateAsync(id, request, cancellationToken);
         return Ok(result);
     }
-    
-    
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<SessionResponseDto>> GetAsync(Guid id, CancellationToken cancellationToken)
     {
         var result = await _sessionService.GetAsync(id, cancellationToken);
-        
+
         return Ok(result);
     }
 
@@ -54,7 +78,7 @@ public class SessionsController : ControllerBase
     {
         var result = await _sessionService
             .GetAllUsingPaginationAsync(request.PageNumber, request.PageSize, cancellationToken);
-        
+
         return Ok(result);
     }
 
@@ -66,14 +90,14 @@ public class SessionsController : ControllerBase
         var result = await _sessionService.GetSessionsByClientId(clientId, cancellationToken);
         return Ok(result);
     }
-    
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
         await _sessionService.DeleteAsync(id, cancellationToken);
-        
+
         return NoContent();
     }
 }

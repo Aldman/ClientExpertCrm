@@ -1,4 +1,5 @@
 ﻿using Shared.Constants;
+using Shared.Extensions;
 
 namespace NotificationService.Messaging.EventProcessing;
 
@@ -22,11 +23,40 @@ public class EventProcessor : IEventProcessor
                 _logger.LogInformation("User logged in: {Message}", message);
                 break;
             case RoutingKeys.ClientCreated:
-                _logger.LogInformation("Client created: {Message}", message);
+                SendWelcomeMessage(message);
                 break;
             case RoutingKeys.SessionPlanned:
-                _logger.LogInformation("Session planned: {Message}", message);
+                SendReminder(message);
                 break;
         }
+    }
+
+    private void SendReminder(string message)
+    {
+        _logger.LogDebug("Sending reminder message: {Message}", message);
+        
+        var sessionPlannedEvent = message.ToSessionPlannedEvent();
+        if (sessionPlannedEvent != null)
+        {
+            _logger.LogInformation("Reminder for session {date} ({minutes} min)",
+                sessionPlannedEvent.ScheduledAt.ToString("dd.MM.yyyy HH:mm"),
+                sessionPlannedEvent.DurationInMinutes
+                );
+        }
+        else
+            _logger.LogError("Incorrect client created message: {Message}", message);
+    }
+
+    private void SendWelcomeMessage(string message)
+    {
+        _logger.LogDebug("Sending welcome message: {Message}", message);
+        
+        var clientCreatedEvent = message.ToClientCreatedEvent();
+        if (clientCreatedEvent != null)
+        {
+            _logger.LogInformation("Welcome email sent to {Email}", clientCreatedEvent.Email);
+        }
+        else
+            _logger.LogError("Incorrect client created message: {Message}", message);
     }
 }

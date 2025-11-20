@@ -11,7 +11,6 @@ namespace Shared.Messaging;
 public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
 {
     private readonly ILogger<RabbitMqPublisher> _logger;
-    private readonly IConfiguration _configuration;
     private readonly IConnection _connection;
     private readonly IChannel _channel;
 
@@ -19,14 +18,13 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
         IConfiguration configuration)
     {
         _logger = logger;
-        _configuration = configuration;
 
         var factory = new ConnectionFactory
         {
-            HostName = _configuration["RabbitMq:HostName"]!,
+            HostName = configuration["RabbitMq:HostName"]!,
             Port = 5672,
-            UserName = _configuration["RabbitMq:User"]!,
-            Password = _configuration["RabbitMq:Password"]!,
+            UserName = configuration["RabbitMq:User"]!,
+            Password = configuration["RabbitMq:Password"]!,
             RequestedHeartbeat = TimeSpan.FromSeconds(60)
         };
         try
