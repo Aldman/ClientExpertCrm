@@ -1,11 +1,17 @@
 ﻿using CRMService.Data;
 using CRMService.Data.Repositories.Client;
 using CRMService.Data.Repositories.Session;
+using CRMService.DTOs.Client;
+using CRMService.DTOs.Session;
 using CRMService.Services.Client;
 using CRMService.Services.Session;
+using CRMService.Validators.Client;
+using CRMService.Validators.Session;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Constants;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 namespace CRMService.Extensions;
 
@@ -22,11 +28,22 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<IClientService, ClientService>();
         services.AddScoped<ISessionService, SessionService>();
-        
+
+        AddValidation(services);
+
         services.AddControllers();
         services.AddSwaggerGen();
 
         return services;
+    }
+
+    private static void AddValidation(IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddScoped<IValidator<CreateClientRequestDto>, CreateClientRequestValidator>();
+        services.AddScoped<IValidator<UpdateClientRequestDto>, UpdateClientRequestValidator>();
+        services.AddScoped<IValidator<CreateSessionRequestDto>, CreateSessionRequestValidator>();
+        services.AddScoped<IValidator<UpdateSessionRequestDto>, UpdateSessionRequestValidator>();
     }
 
     private static void ConfigureSerilog(IServiceCollection services, IConfiguration configuration)
