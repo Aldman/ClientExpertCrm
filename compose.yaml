@@ -72,6 +72,12 @@
       - "5437:5432"
     volumes:
       - CrmServiceData:/var/lib/postgresql/MAJOR/docker
+      
+  redis:
+    image: redis:8.4-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
         
 volumes:
   UserServiceData:

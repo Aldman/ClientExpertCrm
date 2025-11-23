@@ -1,4 +1,6 @@
-﻿using CRMService.Data;
+﻿using CRMService.Cache;
+using CRMService.Constants;
+using CRMService.Data;
 using CRMService.Data.Repositories.Client;
 using CRMService.Data.Repositories.Session;
 using CRMService.DTOs.Client;
@@ -13,6 +15,7 @@ using Serilog;
 using Shared.Constants;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using StackExchange.Redis;
 
 namespace CRMService.Extensions;
 
@@ -27,9 +30,13 @@ public static class ServiceCollectionExtensions
         
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
+        services.AddScoped<ICacheRepository, CacheRepository>();
         services.AddScoped<IClientService, ClientService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
+            ConnectionMultiplexer.Connect(configuration.GetConnectionString(RedisConstants.ConnectionStringName)!)
+        );
 
         AddValidation(services);
 
