@@ -27,6 +27,8 @@ public class ExceptionHandlingMiddleware
                 ClientNotFoundException => (HttpStatusCode.NotFound, "Client not found"),
                 SessionNotFoundException => (HttpStatusCode.NotFound, "Session not found"),
                 InvalidDataException => (HttpStatusCode.Unauthorized, "Invalid input data"),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Access is denied"),
+                UserIdMissingException => (HttpStatusCode.Forbidden, "Missing User Id header"),
                 _ => (HttpStatusCode.InternalServerError, "Server error")
             };
             

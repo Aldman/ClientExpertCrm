@@ -1,5 +1,6 @@
 ﻿using CRMService.DTOs;
 using CRMService.DTOs.Client;
+using CRMService.Extensions;
 using CRMService.Services.Client;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
@@ -30,7 +31,8 @@ public class ClientsController : ControllerBase
         [FromBody] CreateClientRequestDto requestDto,
         CancellationToken cancellationToken)
     {
-        var result = await _clientService.CreateAsync(requestDto, cancellationToken);
+        var userId = HttpContext.Request.Headers.GetUserId();
+        var result = await _clientService.CreateAsync(requestDto, userId, cancellationToken);
 
         _logger.LogInformation("Attempt to publish a client creating message");
         try
@@ -58,7 +60,10 @@ public class ClientsController : ControllerBase
         UpdateClientRequestDto request,
         CancellationToken cancellationToken)
     {
-        var result = await _clientService.UpdateAsync(id, request, cancellationToken);
+        var userId = HttpContext.Request.Headers.GetUserId();
+        
+        var result = await _clientService.UpdateAsync(id, userId, request, cancellationToken);
+        
         return Ok(result);
     }
 
@@ -78,7 +83,9 @@ public class ClientsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await _clientService.GetAsync(id, cancellationToken);
+        var userId = HttpContext.Request.Headers.GetUserId();
+        
+        var result = await _clientService.GetAsync(id, userId, cancellationToken);
 
         return Ok(result);
     }
@@ -98,7 +105,9 @@ public class ClientsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        await _clientService.DeleteAsync(id, cancellationToken);
+        var userId = HttpContext.Request.Headers.GetUserId();
+        
+        await _clientService.DeleteAsync(id, userId, cancellationToken);
 
         return NoContent();
     }

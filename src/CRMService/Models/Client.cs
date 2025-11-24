@@ -30,7 +30,6 @@ public static class ClientExtensions
         currentClient.Name = updateInfo.Name;
         currentClient.Email = updateInfo.Email;
         currentClient.Phone = updateInfo.Phone;
-        currentClient.UserId = updateInfo.UserId;
         
         return currentClient;
     }
