@@ -30,6 +30,7 @@ public class ClientsController : ControllerBase
         [FromBody] CreateClientRequestDto requestDto,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Creating new client");
         var result = await _clientService.CreateAsync(requestDto, cancellationToken);
 
         _logger.LogInformation("Attempt to publish a client creating message");
@@ -58,7 +59,9 @@ public class ClientsController : ControllerBase
         UpdateClientRequestDto request,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Updating the client");
         var result = await _clientService.UpdateAsync(id, request, cancellationToken);
+        
         return Ok(result);
     }
 
@@ -78,6 +81,7 @@ public class ClientsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Getting the client by id");
         var result = await _clientService.GetAsync(id, cancellationToken);
 
         return Ok(result);
@@ -88,6 +92,7 @@ public class ClientsController : ControllerBase
         Guid userId,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Getting clients by the user id");
         var result = await _clientService.GetClientsByUserIdAsync(userId, cancellationToken);
 
         return Ok(result);
@@ -98,6 +103,7 @@ public class ClientsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Deleting the client by id");
         await _clientService.DeleteAsync(id, cancellationToken);
 
         return NoContent();

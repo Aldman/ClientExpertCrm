@@ -8,17 +8,20 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    Log.Information("Starting configuring all services");
     builder.Services.ConfigureAllServices(builder.Configuration);
     
+    Log.Information("Setup app pipeline");
     var app = builder
         .Build()
         .SetupMiddlewares();
 
+    Log.Information("Starting app");
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Неожиданное завершение работы приложения. Текст ошибки: {ErrorMessage}", ex.Message);
+    Log.Fatal(ex, "Unexpected shutdown of the application. Error text: {ErrorMessage}", ex.Message);
 }
 finally
 {
