@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Mime;
+using CRMService.Exceptions;
 
 namespace CRMService.Middlewares;
 
@@ -23,7 +24,11 @@ public class ExceptionHandlingMiddleware
             var (status, title) = ex switch
             {
                 ArgumentException => (HttpStatusCode.BadRequest, "Invalid request"),
+                ClientNotFoundException => (HttpStatusCode.NotFound, "Client not found"),
+                SessionNotFoundException => (HttpStatusCode.NotFound, "Session not found"),
                 InvalidDataException => (HttpStatusCode.Unauthorized, "Invalid input data"),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Access is denied"),
+                UserIdMissingException => (HttpStatusCode.Forbidden, "Missing User Id header"),
                 _ => (HttpStatusCode.InternalServerError, "Server error")
             };
             
