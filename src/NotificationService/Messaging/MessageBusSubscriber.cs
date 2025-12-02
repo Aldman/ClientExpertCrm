@@ -3,7 +3,6 @@ using NotificationService.Messaging.EventProcessing;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Shared.Constants;
-using Shared.Extensions;
 
 namespace NotificationService.Messaging;
 
@@ -19,6 +18,8 @@ public class MessageBusSubscriber : BackgroundService
     private const int MaxRetryCount = 3;
     private readonly TimeSpan _retryInterval = TimeSpan.FromSeconds(1);
     private int _retryCounter;
+    
+    private bool _isInitialized;
 
     public MessageBusSubscriber(
         IEventProcessor eventProcessor,
@@ -28,11 +29,12 @@ public class MessageBusSubscriber : BackgroundService
         _eventProcessor = eventProcessor;
         _configuration = configuration;
         _logger = logger;
-        InitializeRabbitMq();
     }
 
-    private void InitializeRabbitMq()
+    private async Task InitializeRabbitMqAsync(CancellationToken ct = default)
     {
+        if (_isInitialized) return;
+        
         var factory = new ConnectionFactory
         {
             HostName = _configuration["RabbitMq:HostName"]!,
@@ -42,28 +44,25 @@ public class MessageBusSubscriber : BackgroundService
             RequestedHeartbeat = TimeSpan.FromSeconds(60),
         };
 
-        _connection = factory
-            .CreateConnectionAsync()
-            .WaitAndGetResult();
-        _channel = _connection
-            .CreateChannelAsync()
-            .WaitAndGetResult();
-        _channel.ExchangeDeclareAsync(
+        _connection = await factory.CreateConnectionAsync(ct);
+        _channel = await _connection.CreateChannelAsync(cancellationToken: ct);
+        await _channel.ExchangeDeclareAsync(
             exchange: Exchange.DefaultExchange,
             type: ExchangeType.Direct,
-            durable: true
+            durable: true,
+            cancellationToken: ct
         );
 
-        _queueName = _channel
+        var queue = await _channel
             .QueueDeclareAsync(
                 queue: WellKnownNames.DefaultQueue,
                 durable: true,
-                exclusive: false
-            )
-            .WaitAndGetResult()
-            .QueueName;
+                exclusive: false,
+                cancellationToken: ct
+            );
+        _queueName = queue.QueueName;
 
-        BindRoutingKeys();
+        await BindRoutingKeysAsync(ct);
 
         _logger.LogInformation("Listening on the MessageBus");
 
@@ -72,38 +71,46 @@ public class MessageBusSubscriber : BackgroundService
             _logger.LogInformation("RabbitMq connection shutdown");
             return Task.CompletedTask;
         };
+
+        _isInitialized = true;
     }
 
-    private void BindRoutingKeys()
+    private async Task BindRoutingKeysAsync(CancellationToken ct = default)
     {
-        _channel.QueueBindAsync(
+        await _channel.QueueBindAsync(
             queue: _queueName,
             exchange: Exchange.DefaultExchange,
-            routingKey: RoutingKeys.ClientCreated
-        ).WaitProperly();
+            routingKey: RoutingKeys.ClientCreated,
+            cancellationToken: ct
+        );
 
-        _channel.QueueBindAsync(
+        await _channel.QueueBindAsync(
             queue: _queueName,
             exchange: Exchange.DefaultExchange,
-            routingKey: RoutingKeys.SessionPlanned
-        ).WaitProperly();
+            routingKey: RoutingKeys.SessionPlanned,
+            cancellationToken: ct
+        );
 
-        _channel.QueueBindAsync(
+        await _channel.QueueBindAsync(
             queue: _queueName,
             exchange: Exchange.DefaultExchange,
-            routingKey: RoutingKeys.UserCreated
-        ).WaitProperly();
+            routingKey: RoutingKeys.UserCreated,
+            cancellationToken: ct
+        );
 
-        _channel.QueueBindAsync(
+        await _channel.QueueBindAsync(
             queue: _queueName,
             exchange: Exchange.DefaultExchange,
-            routingKey: RoutingKeys.UserLoggedIn
-        ).WaitProperly();
+            routingKey: RoutingKeys.UserLoggedIn,
+            cancellationToken: ct
+        );
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
+        
+        await InitializeRabbitMqAsync(stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += OnReceivedAsync;
