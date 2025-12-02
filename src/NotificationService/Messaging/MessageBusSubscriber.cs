@@ -31,7 +31,7 @@ public class MessageBusSubscriber : BackgroundService
         _logger = logger;
     }
 
-    private async Task InitializeRabbitMqAsync(CancellationToken ct = default)
+    private async Task InitializeRabbitMqIfNotAsync(CancellationToken ct = default)
     {
         if (_isInitialized) return;
         
@@ -110,7 +110,7 @@ public class MessageBusSubscriber : BackgroundService
     {
         stoppingToken.ThrowIfCancellationRequested();
         
-        await InitializeRabbitMqAsync(stoppingToken);
+        await InitializeRabbitMqIfNotAsync(stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += OnReceivedAsync;
