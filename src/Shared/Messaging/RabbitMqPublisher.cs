@@ -86,7 +86,10 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
             if (_channel.IsOpen)
             {
                 _logger.LogInformation("RabbitMq connection opened, sending message...");
-                await polly.ExecuteAsync(async ct => { await SendMessageAsync(message, routingKey, ct); },
+                await polly.ExecuteAsync(async ct =>
+                    {
+                        await SendMessageAsync(message, routingKey, ct);
+                    },
                     cancellationToken: cancellationToken);
             }
             else
