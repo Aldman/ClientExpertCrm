@@ -35,6 +35,24 @@
     restart: always
     ports:
       - "8082:8080"
+        
+  api-gateway:
+#    image: alldman/api-gateway:latest
+    container_name: api-gateway
+    depends_on:
+      - crm-service
+      - notification-service
+      - user-service
+      - user-service-db
+      - crm-service-db
+      - rabbit-mq
+      - redis
+    build:
+      context: .
+      dockerfile: ./src/ApiGateway/Dockerfile
+    restart: always
+    ports:
+      - "8083:8080"
   
   rabbit-mq:
     image: rabbitmq:4.2.0-management-alpine
