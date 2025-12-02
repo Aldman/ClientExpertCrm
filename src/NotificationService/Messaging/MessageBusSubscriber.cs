@@ -42,6 +42,9 @@ public class MessageBusSubscriber : BackgroundService
             UserName = _configuration["RabbitMq:User"]!,
             Password = _configuration["RabbitMq:Password"]!,
             RequestedHeartbeat = TimeSpan.FromSeconds(60),
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromMilliseconds(500),
+            RequestedConnectionTimeout = TimeSpan.FromSeconds(15),
         };
 
         _connection = await factory.CreateConnectionAsync(ct);
@@ -66,13 +69,28 @@ public class MessageBusSubscriber : BackgroundService
 
         _logger.LogInformation("Listening on the MessageBus");
 
+        ConfigureConnectionFallbacks();
+
+        _isInitialized = true;
+    }
+
+    private void ConfigureConnectionFallbacks()
+    {
         _connection.ConnectionShutdownAsync += (_, _) =>
         {
             _logger.LogInformation("RabbitMq connection shutdown");
             return Task.CompletedTask;
         };
-
-        _isInitialized = true;
+        _connection.RecoverySucceededAsync += (_, _) =>
+        {
+            _logger.LogInformation("Connection recovery succeeded.");
+            return Task.CompletedTask;
+        };
+        _connection.ConnectionRecoveryErrorAsync += (_, e) =>
+        {
+            _logger.LogError("Connection recovery error: {ExceptionMessage}", e.Exception.Message);
+            return Task.CompletedTask;
+        };
     }
 
     private async Task BindRoutingKeysAsync(CancellationToken ct = default)
