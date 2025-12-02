@@ -36,7 +36,10 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
             Port = 5672,
             UserName = _configuration["RabbitMq:User"]!,
             Password = _configuration["RabbitMq:Password"]!,
-            RequestedHeartbeat = TimeSpan.FromSeconds(60)
+            RequestedHeartbeat = TimeSpan.FromSeconds(60),
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromMilliseconds(500),
+            RequestedConnectionTimeout = TimeSpan.FromSeconds(15)
         };
         try
         {
@@ -55,11 +58,7 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
                 durable: true,
                 cancellationToken: ct);
 
-            _connection.ConnectionShutdownAsync += (_, _) =>
-            {
-                _logger.LogInformation("RabbitMq connection shutdown");
-                return Task.CompletedTask;
-            };
+            ConfigureConnectionFallbacks();
             _logger.LogInformation("Connected to Message Bus");
         }
         catch (Exception e)
@@ -69,6 +68,25 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
         }
 
         _isInitialized = true;
+    }
+
+    private void ConfigureConnectionFallbacks()
+    {
+        _connection.ConnectionShutdownAsync += (_, _) =>
+        {
+            _logger.LogInformation("RabbitMq connection shutdown");
+            return Task.CompletedTask;
+        };
+        _connection.RecoverySucceededAsync += (_, _) =>
+        {
+            _logger.LogInformation("Connection recovery succeeded.");
+            return Task.CompletedTask;
+        };
+        _connection.ConnectionRecoveryErrorAsync += (_, e) =>
+        {
+            _logger.LogError("Connection recovery error: {ExceptionMessage}", e.Exception.Message);
+            return Task.CompletedTask;
+        };
     }
 
     public async Task PublishAsync<T>(T dto,
