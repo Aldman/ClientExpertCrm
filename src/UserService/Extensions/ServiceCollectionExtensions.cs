@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Polly.Retry;
 using Serilog;
 using Shared.Constants;
+using Shared.Helpers;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using UserService.Data;
@@ -29,6 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddSwaggerGen();
         ConfigureValidators(services);
         ConfigureAuth(services, configuration);
+        DiConfiguringHelper.AddRabbitMqResilience(services);
 
         return services;
     }

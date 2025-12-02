@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Polly.Registry;
 using RabbitMQ.Client;
 using Shared.Constants;
 using Shared.Extensions;
@@ -11,13 +12,16 @@ namespace Shared.Messaging;
 public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
 {
     private readonly ILogger<RabbitMqPublisher> _logger;
+    private readonly ResiliencePipelineProvider<string> _resilienceProvider;
     private readonly IConnection _connection;
     private readonly IChannel _channel;
 
     public RabbitMqPublisher(ILogger<RabbitMqPublisher> logger,
+        ResiliencePipelineProvider<string> resilienceProvider,
         IConfiguration configuration)
     {
         _logger = logger;
+        _resilienceProvider = resilienceProvider;
 
         var factory = new ConnectionFactory
         {
@@ -66,27 +70,40 @@ public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
         CancellationToken cancellationToken = default) 
         where T : class
     {
-        var message = JsonSerializer.Serialize(dto);
+        try
+        {
+            var message = JsonSerializer.Serialize(dto);
+            var polly = _resilienceProvider.GetPipeline(WellKnownNames.RabbitMqRetrierName);
 
-        if (_channel.IsOpen)
-        {
-            _logger.LogInformation("RabbitMq connection opened, sending message...");
-            await SendMessageAsync(message, routingKey);
+            if (_channel.IsOpen)
+            {
+                _logger.LogInformation("RabbitMq connection opened, sending message...");
+                await polly.ExecuteAsync(async ct =>
+                {
+                    await SendMessageAsync(message, routingKey, ct);
+                }, 
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                _logger.LogInformation("RabbitMq connection closed, not sending.");
+            }
         }
-        else
+        catch (Exception e)
         {
-            _logger.LogInformation("RabbitMq connection closed, not sending.");
+            _logger.LogCritical("Could not publish due to an exception. Exception: {Message}", e.GetBaseException().Message);
         }
     }
     
-    public async Task SendMessageAsync(string message, string routingKey)
+    private async Task SendMessageAsync(string message, string routingKey, CancellationToken ct = default)
     {
         var body = Encoding.UTF8.GetBytes(message);
         
         await _channel.BasicPublishAsync(
             exchange: Exchange.DefaultExchange,
             routingKey: routingKey,
-            body: body
+            body: body,
+            cancellationToken: ct
         );
         
         _logger.LogInformation("The message has been sent. Message: {Message}", message);

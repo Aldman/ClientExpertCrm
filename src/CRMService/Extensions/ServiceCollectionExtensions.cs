@@ -13,6 +13,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Constants;
+using Shared.Helpers;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using StackExchange.Redis;
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
         );
 
         AddValidation(services);
+        DiConfiguringHelper.AddRabbitMqResilience(services);
 
         services.AddControllers();
         services.AddSwaggerGen();
