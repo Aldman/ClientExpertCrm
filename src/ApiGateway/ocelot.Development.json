@@ -4,6 +4,12 @@
       "UpstreamHttpMethod": ["Post"],
       "UpstreamPathTemplate": "/api/Auth/login",
       "DownstreamPathTemplate": "/api/Auth/login",
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Limit": 3,
+        "Period": "10s",
+        "PeriodTimespan": 10
+      },
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
@@ -15,6 +21,12 @@
       "UpstreamHttpMethod": ["Post"],
       "UpstreamPathTemplate": "/api/Auth/register",
       "DownstreamPathTemplate": "/api/Auth/register",
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Limit": 3,
+        "Period": "10s",
+        "PeriodTimespan": 10
+      },
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
