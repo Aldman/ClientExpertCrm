@@ -4,7 +4,50 @@
       "UpstreamHttpMethod": ["Post"],
       "UpstreamPathTemplate": "/api/Auth/login",
       "DownstreamPathTemplate": "/api/Auth/login",
-      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Auth/register",
+      "DownstreamPathTemplate": "/api/Auth/register",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Auth/users",
+      "DownstreamPathTemplate": "/api/Auth/users",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Auth/user/{id}",
+      "DownstreamPathTemplate": "/api/Auth/user/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Delete"],
+      "UpstreamPathTemplate": "/api/Auth/delete/{id}",
+      "DownstreamPathTemplate": "/api/Auth/delete/{id}",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
@@ -14,6 +57,7 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5187"
+    "BaseUrl": "http://localhost:5187",
+    "DownstreamScheme": "http"
   }
 }
