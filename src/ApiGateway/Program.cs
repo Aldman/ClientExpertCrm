@@ -1,3 +1,5 @@
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 using Serilog;
 
 try
@@ -14,9 +16,17 @@ try
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services));
 
+    builder.Configuration
+        .SetBasePath(builder.Environment.ContentRootPath)
+        .AddOcelot(primaryFile: $"ocelot.{builder.Environment.EnvironmentName}.json",
+            optional: false,
+            reloadOnChange: true
+        );
+    builder.Services.AddOcelot(builder.Configuration);
+
     Log.Information("Setup app pipeline");
     var app = builder.Build();
-    app.MapControllers();
+    await app.UseOcelot();
 
     Log.Information("Starting app");
     app.Run();
