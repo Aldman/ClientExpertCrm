@@ -54,6 +54,96 @@
           "Port": 8080
         }
       ]
+    },
+
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Clients/{id}",
+      "DownstreamPathTemplate": "/api/Clients/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients/user/{id}",
+      "DownstreamPathTemplate": "/api/Clients/user/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients",
+      "DownstreamPathTemplate": "/api/Clients",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Clients/create",
+      "DownstreamPathTemplate": "/api/Clients/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Sessions/{id}",
+      "DownstreamPathTemplate": "/api/Sessions/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions/user/{id}",
+      "DownstreamPathTemplate": "/api/Sessions/user/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions",
+      "DownstreamPathTemplate": "/api/Sessions",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Sessions/create",
+      "DownstreamPathTemplate": "/api/Sessions/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
     }
   ],
   "GlobalConfiguration": {

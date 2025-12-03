@@ -54,6 +54,96 @@
           "Port": 5162
         }
       ]
+    },
+    
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Clients/{id}",
+      "DownstreamPathTemplate": "/api/Clients/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients/user/{id}",
+      "DownstreamPathTemplate": "/api/Clients/user/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients",
+      "DownstreamPathTemplate": "/api/Clients",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Clients/create",
+      "DownstreamPathTemplate": "/api/Clients/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Sessions/{id}",
+      "DownstreamPathTemplate": "/api/Sessions/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions/client/{id}",
+      "DownstreamPathTemplate": "/api/Sessions/client/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions",
+      "DownstreamPathTemplate": "/api/Sessions",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Sessions/create",
+      "DownstreamPathTemplate": "/api/Sessions/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
     }
   ],
   "GlobalConfiguration": {

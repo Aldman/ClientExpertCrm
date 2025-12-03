@@ -16,9 +16,11 @@ try
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services));
 
+    var envName = builder.Environment.EnvironmentName;
+    Log.Information("Current environment: {EnvironmentName}", envName);
     builder.Configuration
         .SetBasePath(builder.Environment.ContentRootPath)
-        .AddOcelot(primaryFile: $"ocelot.{builder.Environment.EnvironmentName}.json",
+        .AddOcelot(primaryFile: $"ocelot.{envName}.json",
             optional: false,
             reloadOnChange: true
         );
