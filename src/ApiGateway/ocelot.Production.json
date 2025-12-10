@@ -97,12 +97,12 @@
     },
     {
       "UpstreamHttpMethod": ["Get"],
-      "UpstreamPathTemplate": "/api/Clients/user/{id}",
+      "UpstreamPathTemplate": "/api/Clients/user",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       },
-      "DownstreamPathTemplate": "/api/Clients/user/{id}",
+      "DownstreamPathTemplate": "/api/Clients/user",
       "DownstreamHostAndPorts": [
         {
           "Host": "crm-service",

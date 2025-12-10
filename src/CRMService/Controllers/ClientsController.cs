@@ -35,7 +35,8 @@ public class ClientsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating new client");
-        var result = await _clientService.CreateAsync(requestDto, cancellationToken);
+        var userId = HttpContext.User.GetUserId();
+        var result = await _clientService.CreateAsync(requestDto,userId, cancellationToken);
 
         _logger.LogInformation("Attempt to publish a client creating message");
         try
@@ -64,7 +65,8 @@ public class ClientsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Updating the client");
-        var result = await _clientService.UpdateAsync(id, request, cancellationToken);
+        var userId = HttpContext.User.GetUserId();
+        var result = await _clientService.UpdateAsync(id, userId, request, cancellationToken);
         
         return Ok(result);
     }
@@ -86,17 +88,18 @@ public class ClientsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting the client by id");
-        var result = await _clientService.GetAsync(id, cancellationToken);
+        var userId = HttpContext.User.GetUserId();
+        var result = await _clientService.GetAsync(id, userId, cancellationToken);
 
         return Ok(result);
     }
 
-    [HttpGet("user/{userId:guid}")]
-    public async Task<IActionResult> GetClientsByUserIdAsync(
-        Guid userId,
+    [HttpGet("user")]
+    public async Task<IActionResult> GetClientsForCurrentUserIdAsync(
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting clients by the user id");
+        var userId = HttpContext.User.GetUserId();
         var result = await _clientService.GetClientsByUserIdAsync(userId, cancellationToken);
 
         return Ok(result);
@@ -108,7 +111,8 @@ public class ClientsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Deleting the client by id");
-        await _clientService.DeleteAsync(id, cancellationToken);
+        var userId = HttpContext.User.GetUserId();
+        await _clientService.DeleteAsync(id, userId, cancellationToken);
 
         return NoContent();
     }

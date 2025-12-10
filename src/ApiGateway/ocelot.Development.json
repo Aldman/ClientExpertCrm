@@ -97,8 +97,8 @@
     },
     {
       "UpstreamHttpMethod": ["Get"],
-      "UpstreamPathTemplate": "/api/Clients/user/{id}",
-      "DownstreamPathTemplate": "/api/Clients/user/{id}",
+      "UpstreamPathTemplate": "/api/Clients/user",
+      "DownstreamPathTemplate": "/api/Clients/user",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
