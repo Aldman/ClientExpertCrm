@@ -13,6 +13,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Constants;
+using Shared.Extensions;
 using Shared.Helpers;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -39,6 +40,10 @@ public static class ServiceCollectionExtensions
             ConnectionMultiplexer.Connect(configuration.GetConnectionString(RedisConstants.ConnectionStringName)!)
         );
 
+        // todo: change it everywhere
+        const string secretKey = "mysupersecret_secretsecretsecretkey!123";
+        services.AddJwtAuthentication(secretKey);
+        
         AddValidation(services);
         DiConfiguringHelper.AddRabbitMqResilience(services);
 

@@ -9,9 +9,11 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["/src/ApiGateway/ApiGateway.csproj", "./ApiGateway/"]
+COPY ["/src/Shared/Shared.csproj", "./Shared/"]
 RUN dotnet restore ApiGateway/ApiGateway.csproj
 
 COPY ["/src/ApiGateway/", "./ApiGateway/"]
+COPY ["/src/Shared/", "./Shared/"]
 
 WORKDIR /src/ApiGateway
 RUN dotnet build ApiGateway.csproj -c $BUILD_CONFIGURATION -o /app/build

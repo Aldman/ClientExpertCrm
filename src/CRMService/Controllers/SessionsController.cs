@@ -1,6 +1,7 @@
 ﻿using CRMService.DTOs;
 using CRMService.DTOs.Session;
 using CRMService.Services.Session;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
 using Shared.Events;
@@ -9,6 +10,7 @@ using Shared.Messaging;
 namespace CRMService.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class SessionsController : ControllerBase
 {

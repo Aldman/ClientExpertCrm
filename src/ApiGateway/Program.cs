@@ -1,6 +1,7 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Serilog;
+using Shared.Extensions;
 
 try
 {
@@ -15,6 +16,10 @@ try
     builder.Services.AddSerilog((services, lc) => lc
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services));
+    
+    // todo: change it everywhere
+    const string secretKey = "mysupersecret_secretsecretsecretkey!123";
+    builder.Services.AddJwtAuthentication(secretKey);
 
     var envName = builder.Environment.EnvironmentName;
     Log.Information("Current environment: {EnvironmentName}", envName);
@@ -28,6 +33,8 @@ try
 
     Log.Information("Setup app pipeline");
     var app = builder.Build();
+    app.UseAuthentication();
+    app.UseAuthorization();
     await app.UseOcelot();
 
     Log.Information("Starting app");
