@@ -2,6 +2,7 @@
 using CRMService.DTOs.Client;
 using CRMService.Exceptions;
 using CRMService.Models;
+using CRMService.Validators;
 using Mapster;
 
 namespace CRMService.Services.Client;
@@ -15,10 +16,14 @@ public class ClientService : IClientService
         _repository = repository;
     }
     
-    public async Task<ClientResponseDto> CreateAsync(CreateClientRequestDto request, CancellationToken cancellationToken)
+    public async Task<ClientResponseDto> CreateAsync(
+        CreateClientRequestDto request, 
+        Guid userId,
+        CancellationToken cancellationToken)
     {
         var client = request.Adapt<Models.Client>();
         client.Id = Guid.NewGuid();
+        client.UserId = userId;
         
         await _repository.AddAsync(client, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
@@ -26,13 +31,12 @@ public class ClientService : IClientService
         return client.Adapt<ClientResponseDto>();
     }
 
-    public async Task<ClientResponseDto> UpdateAsync(Guid clientId, UpdateClientRequestDto request, CancellationToken cancellationToken)
+    public async Task<ClientResponseDto> UpdateAsync(Guid clientId, Guid userId, UpdateClientRequestDto request, CancellationToken cancellationToken)
     {
         var client = await _repository.GetAsync(clientId, cancellationToken);
         if (client is null)
-        {
             throw new ClientNotFoundException("Client not found");
-        }
+        CommonValidators.ValidateOrThrow(userId, client.UserId);
         
         client = client.Update(request);
         await _repository.UpdateAsync(client, cancellationToken);
@@ -41,9 +45,11 @@ public class ClientService : IClientService
         return client.Adapt<ClientResponseDto>();
     }
 
-    public async Task<ClientResponseDto> GetAsync(Guid clientId, CancellationToken cancellationToken)
+    public async Task<ClientResponseDto> GetAsync(Guid clientId, Guid userId, CancellationToken cancellationToken)
     {
         var client = await _repository.GetAsync(clientId, cancellationToken);
+        if (client is not null)
+            CommonValidators.ValidateOrThrow(userId, client.UserId);
         
         return client.Adapt<ClientResponseDto>();
     }
@@ -62,8 +68,9 @@ public class ClientService : IClientService
         return clients.Adapt<List<ClientResponseDto>>();
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
+        await GetAsync(id, userId, cancellationToken);
         await  _repository.DeleteAsync(id, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
     }
