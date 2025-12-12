@@ -40,8 +40,7 @@ public static class ServiceCollectionExtensions
             ConnectionMultiplexer.Connect(configuration.GetConnectionString(RedisConstants.ConnectionStringName)!)
         );
 
-        // todo: change it everywhere
-        const string secretKey = "mysupersecret_secretsecretsecretkey!123";
+        var secretKey = configuration["JwtOptions:SecretKey"]!;
         services.AddJwtAuthentication(secretKey);
         
         AddValidation(services);
@@ -81,7 +80,7 @@ public static class ServiceCollectionExtensions
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 
-            var connectionString = configuration.GetConnectionString(WellKnownNames.DefaultConnection);
+            var connectionString = configuration.GetConnectionString("CrmServiceConnection");
 
             options.UseNpgsql(connectionString);
         });
