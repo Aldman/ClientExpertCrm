@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using NotificationService.Constants;
 using NotificationService.Messaging.EventProcessing;
+using Polly.Registry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Shared.Constants;
@@ -10,6 +12,7 @@ public class MessageBusSubscriber : BackgroundService
 {
     private readonly IEventProcessor _eventProcessor;
     private readonly IConfiguration _configuration;
+    private readonly ResiliencePipelineProvider<string> _resilienceProvider;
     private readonly ILogger<MessageBusSubscriber> _logger;
     private IConnection _connection;
     private IChannel _channel;
@@ -24,10 +27,12 @@ public class MessageBusSubscriber : BackgroundService
     public MessageBusSubscriber(
         IEventProcessor eventProcessor,
         IConfiguration configuration,
+        ResiliencePipelineProvider<string> resilienceProvider,
         ILogger<MessageBusSubscriber> logger)
     {
         _eventProcessor = eventProcessor;
         _configuration = configuration;
+        _resilienceProvider = resilienceProvider;
         _logger = logger;
     }
 
@@ -47,7 +52,13 @@ public class MessageBusSubscriber : BackgroundService
             RequestedConnectionTimeout = TimeSpan.FromSeconds(15),
         };
 
-        _connection = await factory.CreateConnectionAsync(ct);
+        var polly = _resilienceProvider.GetPipeline(UsedNames.MessageBusSubscriberRetrierName);
+        await polly.ExecuteAsync(async cancellationToken =>
+            {
+                _connection = await factory.CreateConnectionAsync(cancellationToken);
+            },
+            cancellationToken: ct);
+        
         _channel = await _connection.CreateChannelAsync(cancellationToken: ct);
         await _channel.ExchangeDeclareAsync(
             exchange: Exchange.DefaultExchange,
