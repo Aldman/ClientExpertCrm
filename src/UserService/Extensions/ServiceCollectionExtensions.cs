@@ -1,15 +1,16 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Shared.Constants;
 using Shared.Extensions;
 using Shared.Helpers;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using UserService.Data;
-using UserService.Data.Repository;
+using UserService.Data.Repositories.Outbox;
+using UserService.Data.Repositories.User;
 using UserService.DTOs;
 using UserService.Helpers.Jwt;
+using UserService.Outbox;
 using UserService.Services;
 using UserService.Validators;
 
@@ -21,7 +22,10 @@ public static class ServiceCollectionExtensions
     {
         ConfigureSerilog(services, configuration);
         ConfigureDbContext(services, configuration);
+        services.AddHostedService<OutboxBackgroundService>();
+        services.AddScoped<OutboxProcessor>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<IUserService, Services.UserService>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddSingleton<IEventPublisher, RabbitMqPublisher>();

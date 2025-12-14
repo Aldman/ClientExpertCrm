@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using UserService.Models;
 
-namespace UserService.Data.Repository;
+namespace UserService.Data.Repositories.User;
 
 public class UserRepository : IUserRepository
 {
@@ -12,27 +13,27 @@ public class UserRepository : IUserRepository
         _dbContext = dbContext;
     }
     
-    public async Task AddAsync(User user, CancellationToken ct)
+    public async Task AddAsync(Models.User user, CancellationToken ct)
     {
         await _dbContext.Users.AddAsync(user, ct);
     }
 
-    public async Task<User?> GetByUserNameAsync(string userName, CancellationToken ct)
+    public async Task<Models.User?> GetByUserNameAsync(string userName, CancellationToken ct)
     {
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == userName, ct);
     }
 
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
+    public async Task<Models.User?> GetByEmailAsync(string email, CancellationToken ct)
     {
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
     }
 
-    public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<Models.User?> GetByIdAsync(Guid id, CancellationToken ct)
     { 
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
     }
 
-    public async Task<IEnumerable<User>> GetUsersAsync(int page, int pageSize, CancellationToken ct)
+    public async Task<IEnumerable<Models.User>> GetUsersAsync(int page, int pageSize, CancellationToken ct)
     {
         return await _dbContext.Users
             .Skip((page - 1) * pageSize)
@@ -40,13 +41,13 @@ public class UserRepository : IUserRepository
             .ToListAsync(ct);
     }
 
-    public async Task UpdateAsync(User user, CancellationToken ct)
+    public async Task UpdateAsync(Models.User user, CancellationToken ct)
     {
         var toEdit = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id, ct);
         toEdit?.Change(user);
     }
 
-    public async Task UpdateAsync(Guid userId, User newUser, CancellationToken ct)
+    public async Task UpdateAsync(Guid userId, Models.User newUser, CancellationToken ct)
     {
         newUser.Id = userId;
         await UpdateAsync(newUser, ct);
@@ -58,9 +59,14 @@ public class UserRepository : IUserRepository
         Delete(user);
     }
 
-    public void Delete(User user)
+    public void Delete(Models.User user)
     {
         _dbContext.Users.Remove(user);
+    }
+
+    public async Task<IDbContextTransaction> CreateTransactionAsync(CancellationToken ct)
+    {
+        return await _dbContext.Database.BeginTransactionAsync(ct);
     }
 
     public async Task SaveChangesAsync(CancellationToken ct)
