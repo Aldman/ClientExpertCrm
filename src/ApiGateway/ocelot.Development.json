@@ -1,0 +1,209 @@
+{
+  "Routes": [
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Auth/login",
+      "DownstreamPathTemplate": "/api/Auth/login",
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Limit": 3,
+        "Period": "10s",
+        "PeriodTimespan": 10
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Auth/register",
+      "DownstreamPathTemplate": "/api/Auth/register",
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Limit": 3,
+        "Period": "10s",
+        "PeriodTimespan": 10
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Auth/users",
+      "DownstreamPathTemplate": "/api/Auth/users",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Auth/user/{id}",
+      "DownstreamPathTemplate": "/api/Auth/user/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Delete"],
+      "UpstreamPathTemplate": "/api/Auth/delete/{id}",
+      "DownstreamPathTemplate": "/api/Auth/delete/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5162
+        }
+      ]
+    },
+    
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Clients/{id}",
+      "DownstreamPathTemplate": "/api/Clients/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients/user",
+      "DownstreamPathTemplate": "/api/Clients/user",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Clients",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Clients/create",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Clients/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Sessions/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions/client/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions/client/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Sessions/create",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5113
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5187",
+    "DownstreamScheme": "http"
+  }
+}

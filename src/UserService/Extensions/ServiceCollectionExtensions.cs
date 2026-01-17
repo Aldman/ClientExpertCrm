@@ -1,15 +1,16 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Shared.Constants;
+using Shared.Extensions;
+using Shared.Helpers;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using UserService.Data;
-using UserService.Data.Repository;
+using UserService.Data.Repositories.Outbox;
+using UserService.Data.Repositories.User;
 using UserService.DTOs;
 using UserService.Helpers.Jwt;
+using UserService.Outbox;
 using UserService.Services;
 using UserService.Validators;
 
@@ -21,14 +22,20 @@ public static class ServiceCollectionExtensions
     {
         ConfigureSerilog(services, configuration);
         ConfigureDbContext(services, configuration);
+        services.AddHostedService<OutboxBackgroundService>();
+        services.AddScoped<OutboxProcessor>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<IUserService, Services.UserService>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
         services.AddControllers();
         services.AddSwaggerGen();
         ConfigureValidators(services);
-        ConfigureAuth(services, configuration);
+        DiConfiguringHelper.AddRabbitMqResilience(services);
+
+        var secretKey = configuration["JwtOptions:SecretKey"]!;
+        services.AddJwtAuthentication(secretKey);
 
         return services;
     }
@@ -39,34 +46,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<RegisterUserRequestDto>, RegisterUserRequestDtoValidator>();
         services.AddScoped<IValidator<GetUsersRequest>, GetUsersRequestValidator>();
         services.AddScoped<IValidator<LoginUserRequestDto>, LoginUserRequestDtoValidator>();
-    }
-
-    private static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
-    {
-        Log.Information("Configuring Auth");
-        
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = configuration.GetSecurityKey(),
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        context.Token = context.Request.Cookies[WellKnownNames.TokenName];
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-        services.AddAuthentication();
     }
 
     private static void ConfigureSerilog(IServiceCollection services, IConfiguration configuration)
@@ -88,7 +67,7 @@ public static class ServiceCollectionExtensions
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         
-            var connectionString = configuration.GetConnectionString(WellKnownNames.DefaultConnection);
+            var connectionString = configuration.GetConnectionString("UserServiceConnection");
         
             options.UseNpgsql(connectionString);
         });

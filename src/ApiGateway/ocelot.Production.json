@@ -1,0 +1,209 @@
+{
+  "Routes": [
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Auth/login",
+      "DownstreamPathTemplate": "/api/Auth/login",
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Limit": 3,
+        "Period": "10s",
+        "PeriodTimespan": 10
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Auth/register",
+      "DownstreamPathTemplate": "/api/Auth/register",
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Limit": 3,
+        "Period": "10s",
+        "PeriodTimespan": 10
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Auth/users",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Auth/users",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Auth/user/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Auth/user/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Delete"],
+      "UpstreamPathTemplate": "/api/Auth/delete/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Auth/delete/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 8080
+        }
+      ]
+    },
+
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Clients/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Clients/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients/user",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Clients/user",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Clients",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Clients",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Clients/create",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Clients/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    
+    {
+      "UpstreamHttpMethod": ["Delete", "Post", "Get"],
+      "UpstreamPathTemplate": "/api/Sessions/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions/user/{id}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions/user/{id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Get"],
+      "UpstreamPathTemplate": "/api/Sessions",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    },
+    {
+      "UpstreamHttpMethod": ["Post"],
+      "UpstreamPathTemplate": "/api/Sessions/create",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamPathTemplate": "/api/Sessions/create",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "crm-service",
+          "Port": 8080
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:8083",
+    "DownstreamScheme": "http"
+  }
+}

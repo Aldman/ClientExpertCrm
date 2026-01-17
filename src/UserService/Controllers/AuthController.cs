@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Constants;
-using Shared.Messaging;
 using UserService.DTOs;
 using UserService.Extensions;
 using UserService.Services;
@@ -14,15 +12,12 @@ public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly ILogger<AuthController> _logger;
-    private readonly IEventPublisher _eventPublisher;
 
     public AuthController(IUserService userService,
-        ILogger<AuthController> logger,
-        IEventPublisher eventPublisher)
+        ILogger<AuthController> logger)
     {
         _userService = userService;
         _logger = logger;
-        _eventPublisher = eventPublisher;
     }
 
     [HttpPost("register")]
@@ -32,16 +27,6 @@ public class AuthController : ControllerBase
     {
         _logger.LogInformation("User registration");
         var result = await _userService.RegisterAsync(userRequest, cancellationToken);
-
-        _logger.LogInformation("Attempt to publish a registration message");
-        try
-        {
-            await _eventPublisher.PublishAsync(result, RoutingKeys.UserCreated, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Couldn't publish register message. Error: {error}", e.GetBaseException().Message);
-        }
 
         _logger.LogInformation("Adding user id to headers");
         Response.AddUserHeader(result.Id);
@@ -95,22 +80,6 @@ public class AuthController : ControllerBase
         _logger.LogInformation("Attempt to log in");
         var token = await _userService.LoginAsync(userRequest, cancellationToken);
         
-        _logger.LogInformation("Attempt to publish a log in message");
-        try
-        {
-            await _eventPublisher.PublishAsync(
-                message: userRequest.Email,
-                routingKey: RoutingKeys.UserLoggedIn,
-                cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Couldn't publish log in message. Error: {error}", e.GetBaseException().Message);
-        }
-
-        _logger.LogInformation("Writing a token to cookies");
-        Response.Cookies.Append(WellKnownNames.TokenName, token);
-
         return Ok(token);
     }
 }

@@ -13,6 +13,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Constants;
+using Shared.Extensions;
+using Shared.Helpers;
 using Shared.Messaging;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using StackExchange.Redis;
@@ -38,7 +40,11 @@ public static class ServiceCollectionExtensions
             ConnectionMultiplexer.Connect(configuration.GetConnectionString(RedisConstants.ConnectionStringName)!)
         );
 
+        var secretKey = configuration["JwtOptions:SecretKey"]!;
+        services.AddJwtAuthentication(secretKey);
+        
         AddValidation(services);
+        DiConfiguringHelper.AddRabbitMqResilience(services);
 
         services.AddControllers();
         services.AddSwaggerGen();
@@ -74,7 +80,7 @@ public static class ServiceCollectionExtensions
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 
-            var connectionString = configuration.GetConnectionString(WellKnownNames.DefaultConnection);
+            var connectionString = configuration.GetConnectionString("CrmServiceConnection");
 
             options.UseNpgsql(connectionString);
         });

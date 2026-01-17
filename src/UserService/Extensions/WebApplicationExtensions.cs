@@ -7,10 +7,10 @@ public static class WebApplicationExtensions
 {
     public static WebApplication SetupMiddlewares(this WebApplication app)
     {
+        app.UseExceptionHandling();
         app.MapControllers();
         app.UseSwagger();
         app.UseSwaggerUI();
-        app.UseExceptionHandling();
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseCookiePolicy(

@@ -3,6 +3,7 @@ using CRMService.DTOs;
 using CRMService.DTOs.Client;
 using CRMService.Extensions;
 using CRMService.Services.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
 using Shared.Events;
@@ -11,6 +12,7 @@ using Shared.Messaging;
 namespace CRMService.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class ClientsController : ControllerBase
 {
@@ -32,11 +34,9 @@ public class ClientsController : ControllerBase
         [FromBody] CreateClientRequestDto requestDto,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(CommonLogMessages.GettingUserId);
-        var userId = HttpContext.Request.Headers.GetUserId();
-        
         _logger.LogInformation("Creating new client");
-        var result = await _clientService.CreateAsync(requestDto, userId, cancellationToken);
+        var userId = HttpContext.User.GetUserId();
+        var result = await _clientService.CreateAsync(requestDto,userId, cancellationToken);
 
         _logger.LogInformation("Attempt to publish a client creating message");
         try
@@ -64,10 +64,8 @@ public class ClientsController : ControllerBase
         UpdateClientRequestDto request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(CommonLogMessages.GettingUserId);
-        var userId = HttpContext.Request.Headers.GetUserId();
-        
         _logger.LogInformation("Updating the client");
+        var userId = HttpContext.User.GetUserId();
         var result = await _clientService.UpdateAsync(id, userId, request, cancellationToken);
         
         return Ok(result);
@@ -89,21 +87,19 @@ public class ClientsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(CommonLogMessages.GettingUserId);
-        var userId = HttpContext.Request.Headers.GetUserId();
-        
         _logger.LogInformation("Getting the client by id");
+        var userId = HttpContext.User.GetUserId();
         var result = await _clientService.GetAsync(id, userId, cancellationToken);
 
         return Ok(result);
     }
 
-    [HttpGet("user/{userId:guid}")]
-    public async Task<IActionResult> GetClientsByUserIdAsync(
-        Guid userId,
+    [HttpGet("user")]
+    public async Task<IActionResult> GetClientsForCurrentUserIdAsync(
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting clients by the user id");
+        var userId = HttpContext.User.GetUserId();
         var result = await _clientService.GetClientsByUserIdAsync(userId, cancellationToken);
 
         return Ok(result);
@@ -114,10 +110,8 @@ public class ClientsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(CommonLogMessages.GettingUserId);
-        var userId = HttpContext.Request.Headers.GetUserId();
-        
         _logger.LogInformation("Deleting the client by id");
+        var userId = HttpContext.User.GetUserId();
         await _clientService.DeleteAsync(id, userId, cancellationToken);
 
         return NoContent();

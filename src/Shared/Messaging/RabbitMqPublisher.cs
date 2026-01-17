@@ -2,93 +2,137 @@
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Polly.Registry;
 using RabbitMQ.Client;
 using Shared.Constants;
-using Shared.Extensions;
 
 namespace Shared.Messaging;
 
 public class RabbitMqPublisher : IEventPublisher, IDisposable, IAsyncDisposable
 {
     private readonly ILogger<RabbitMqPublisher> _logger;
-    private readonly IConnection _connection;
-    private readonly IChannel _channel;
+    private readonly ResiliencePipelineProvider<string> _resilienceProvider;
+    private readonly IConfiguration _configuration;
+    private IConnection _connection;
+    private IChannel _channel;
+    private bool _isInitialized;
 
     public RabbitMqPublisher(ILogger<RabbitMqPublisher> logger,
+        ResiliencePipelineProvider<string> resilienceProvider,
         IConfiguration configuration)
     {
         _logger = logger;
+        _resilienceProvider = resilienceProvider;
+        _configuration = configuration;
+    }
 
+    private async Task InitializeConnectionIfNotAsync(CancellationToken ct = default)
+    {
+        if (_isInitialized) return;
+        
         var factory = new ConnectionFactory
         {
-            HostName = configuration["RabbitMq:HostName"]!,
+            HostName = _configuration["RabbitMq:HostName"]!,
             Port = 5672,
-            UserName = configuration["RabbitMq:User"]!,
-            Password = configuration["RabbitMq:Password"]!,
-            RequestedHeartbeat = TimeSpan.FromSeconds(60)
+            UserName = _configuration["RabbitMq:User"]!,
+            Password = _configuration["RabbitMq:Password"]!,
+            RequestedHeartbeat = TimeSpan.FromSeconds(60),
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromMilliseconds(500),
+            RequestedConnectionTimeout = TimeSpan.FromSeconds(15)
         };
         try
         {
-            _connection = factory
-                .CreateConnectionAsync()
-                .WaitAndGetResult();
-            
-            _channel = _connection
-                .CreateChannelAsync()
-                .WaitAndGetResult();
-            _channel.ExchangeDeclareAsync(
+            _connection = await factory.CreateConnectionAsync(ct);
+
+            _channel = await _connection.CreateChannelAsync(cancellationToken: ct);
+            await _channel.ExchangeDeclareAsync(
                 exchange: Exchange.DefaultExchange,
                 durable: true,
-                type: ExchangeType.Direct)
-                .WaitProperly();
-            _channel.QueueDeclareAsync(
+                type: ExchangeType.Direct,
+                cancellationToken: ct
+            );
+            await _channel.QueueDeclareAsync(
                 queue: WellKnownNames.DefaultQueue,
                 exclusive: false,
-                durable: true)
-            .WaitProperly();
+                durable: true,
+                cancellationToken: ct);
 
-            _connection.ConnectionShutdownAsync += (_, _) =>
-            {
-                logger.LogInformation("RabbitMq connection shutdown");
-                return Task.CompletedTask;
-            };
+            ConfigureConnectionFallbacks();
             _logger.LogInformation("Connected to Message Bus");
         }
         catch (Exception e)
         {
-            logger.LogError("Could not connect to the Message Bus. {Message}", e.Message);
+            _logger.LogError("Could not connect to the Message Bus. {Message}", e.Message);
             throw;
         }
+
+        _isInitialized = true;
     }
-    
-    public async Task PublishAsync<T>(T dto, 
-        string routingKey, 
-        CancellationToken cancellationToken = default) 
+
+    private void ConfigureConnectionFallbacks()
+    {
+        _connection.ConnectionShutdownAsync += (_, _) =>
+        {
+            _logger.LogInformation("RabbitMq connection shutdown");
+            return Task.CompletedTask;
+        };
+        _connection.RecoverySucceededAsync += (_, _) =>
+        {
+            _logger.LogInformation("Connection recovery succeeded.");
+            return Task.CompletedTask;
+        };
+        _connection.ConnectionRecoveryErrorAsync += (_, e) =>
+        {
+            _logger.LogError("Connection recovery error: {ExceptionMessage}", e.Exception.Message);
+            return Task.CompletedTask;
+        };
+    }
+
+    public async Task PublishAsync<T>(T dto,
+        string routingKey,
+        CancellationToken cancellationToken = default)
         where T : class
     {
-        var message = JsonSerializer.Serialize(dto);
+        await InitializeConnectionIfNotAsync(cancellationToken);
+        
+        try
+        {
+            var message = JsonSerializer.Serialize(dto);
+            var polly = _resilienceProvider.GetPipeline(WellKnownNames.RabbitMqRetrierName);
 
-        if (_channel.IsOpen)
-        {
-            _logger.LogInformation("RabbitMq connection opened, sending message...");
-            await SendMessageAsync(message, routingKey);
+            if (_channel.IsOpen)
+            {
+                _logger.LogInformation("RabbitMq connection opened, sending message...");
+                await polly.ExecuteAsync(async ct =>
+                    {
+                        await SendMessageAsync(message, routingKey, ct);
+                    },
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                _logger.LogInformation("RabbitMq connection closed, not sending.");
+            }
         }
-        else
+        catch (Exception e)
         {
-            _logger.LogInformation("RabbitMq connection closed, not sending.");
+            _logger.LogCritical("Could not publish due to an exception. Exception: {Message}",
+                e.GetBaseException().Message);
         }
     }
-    
-    public async Task SendMessageAsync(string message, string routingKey)
+
+    private async Task SendMessageAsync(string message, string routingKey, CancellationToken ct = default)
     {
         var body = Encoding.UTF8.GetBytes(message);
-        
+
         await _channel.BasicPublishAsync(
             exchange: Exchange.DefaultExchange,
             routingKey: routingKey,
-            body: body
+            body: body,
+            cancellationToken: ct
         );
-        
+
         _logger.LogInformation("The message has been sent. Message: {Message}", message);
     }
 
